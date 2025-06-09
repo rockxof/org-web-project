@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* :root,body{
+  background-color: #1a1a1a;
+  color: #fafafa;
+
+} */
+
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
