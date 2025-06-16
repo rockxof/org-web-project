@@ -1,6 +1,7 @@
 import TableHeader from '../pages/TableHeader';
 import SignOut from '../navbar/SignOut';
 import NewDetails from '../pages/NewDetails';
+import UsersAddForm from '../section/UsersAddForm';
 
 const UserDashboard = () => {
 
@@ -8,7 +9,8 @@ const UserDashboard = () => {
     <>
      < SignOut />
     {/* < TableHeader /> */}
-    <NewDetails />
+    {/* <NewDetails /> */}
+    <UsersAddForm />
   </>
   )
 }

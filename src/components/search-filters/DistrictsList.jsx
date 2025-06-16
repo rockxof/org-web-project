@@ -1,4 +1,4 @@
-const DistrictsList = () => {
+const DistrictsList = ({setDistrict}) => {
   const districts = [
     "Araria",
     "Arwal",
@@ -30,17 +30,17 @@ const DistrictsList = () => {
     "Rohtas",
     "Samastipur",
     "Saharsa",
-    "Sheohar	",
-    "Sheikhpura	",
+    "Sheohar",
+    "Sheikhpura",
     "Saran",
     "Sitamarhi",
     "Supaul",
-    "Siwan	",
-    "Vaishali	",
+    "Siwan",
+    "Vaishali",
     "West Champaran",
   ];
   return (
-    <select name="districts" id="districts">
+    <select name="districts" id="districts" onClick={e=> setDistrict(e.target.value)}>
         {districts.map((district, idx)=>{
             return(
                 <option value={district}>{district}</option>

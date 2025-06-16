@@ -27,6 +27,10 @@ const AssemblyList = () => {
     "20-Chiraia",
     "21-Dhaka",
   ];
+
+  const sheohar = ["22-Sheohar"];
+
+  
   return <div>AssemblyList</div>;
 };
 

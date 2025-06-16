@@ -2,8 +2,9 @@ import TableHeader from "./TableHeader";
 
 const UsersTable = () => {
   return (
-    
+    <>
       <TableHeader />
+    </>
   );
 };
 

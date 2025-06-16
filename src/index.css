@@ -9,3 +9,24 @@
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
+
+.img-slider-img{
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: block;
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
+  transition: translate 300ms ease-in-out;
+  /* clip-path: inset(0 round 10px); */
+}
+
+.img-slider-btn:active, .img-slider-btn:hover  > * {
+  animation: squish 200ms ease-in-out;
+}
+
+@keyframes squish{
+  50%{
+    scale: 1.4 .6;
+  }
+}

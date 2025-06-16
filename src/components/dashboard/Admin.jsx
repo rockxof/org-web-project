@@ -7,36 +7,28 @@ import SignOut from "../navbar/SignOut";
 import { UserAuth } from "../../context/AuthContext";
 
 const Admin = () => {
-
   const [gender, setGender] = useState("");
-  const {userRole, session } = UserAuth();
-  const {fetchUsersData} = useUsersData();
+  const { userRole, session } = UserAuth();
+  const { fetchUsersData } = useUsersData();
 
-  const {refresh_token} = session;
-  
+  const { refresh_token } = session;
 
-  // useEffect(()=>{
+  // useEffect(() => {
   //   fetchUsersData();
-    
-  // },[])
-  
-  
+  // }, []);
 
-
-  
   return (
-      <>
-        <SignOut />
-    {/* <GenderMenu setGender= {setGender}/> */}
+    <>
+      <SignOut />
+      {/* <GenderMenu setGender= {setGender}/> */}
       <Filters />
-    {userRole === 'admin' && <UsersTable />}
+      {/* {userRole === 'admin' && <UsersTable />} */}
 
-      {/* <UsersTable /> */}
-    
+      <UsersTable />
+
       {/* <UsersData gender={gender}/> */}
 
-
-       {/* <iframe
+      {/* <iframe
         className="mx-auto mt-16"
         title="Sample Report Demo"
         width="1140"
@@ -45,7 +37,6 @@ const Admin = () => {
         frameborder="0"
         allowFullScreen="true"
       ></iframe> */}
-
     </>
   );
 };

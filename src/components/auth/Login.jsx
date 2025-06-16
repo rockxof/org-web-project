@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button, Checkbox, Form, Input } from "antd";
 import { UserAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router";;
+import { useNavigate } from "react-router";
+import mainbg from "../../assets/images/rm-cs-6.avif"
+import Navbar from "../navbar/Navbar";
 
 const onFinishFailed = (errorInfo) => {
   // console.log("Failed:", errorInfo);
@@ -41,7 +43,9 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col h-dvh w-dvw h-vh items-center justify-center bg-[#FAF9F6]">
+    // style={{backgroundImage: `url(${mainbg})`, backgroundPosition: 'center'}}
+    <div  className="flex flex-col h-dvh w-dvw h-vh items-center justify-center bg-[#FAF9F6]">
+      <Navbar />
       <div className=" rounded-[10px] p-8 shadow-xl bg-[#FBFCF8] relative">
 
           <h1 className="mb-4 font-semibold text-2xl text-center">
