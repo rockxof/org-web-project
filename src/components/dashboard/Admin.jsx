@@ -5,6 +5,7 @@ import Filters from "../search-filters/Filters";
 import UsersTable from "../pages/UsersTable";
 import SignOut from "../navbar/SignOut";
 import { UserAuth } from "../../context/AuthContext";
+import CategoryList from "../section/CategoryList";
 
 const Admin = () => {
   const [gender, setGender] = useState("");
@@ -24,7 +25,9 @@ const Admin = () => {
       <Filters />
       {/* {userRole === 'admin' && <UsersTable />} */}
 
-      <UsersTable />
+      {/* <UsersTable /> */}
+
+      <CategoryList/>
 
       {/* <UsersData gender={gender}/> */}
 

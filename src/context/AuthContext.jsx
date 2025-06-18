@@ -78,6 +78,7 @@ export const DataContextProvider = ({ children }) => {
   const [newUserData, setNewUserData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [search, setSearch] = useState("");
+  const [counts, setCounts] = useState({total: "", M: "", F: ""})
 
   // console.log(Boolean(search))
 
@@ -139,6 +140,7 @@ export const DataContextProvider = ({ children }) => {
     // .range((currentPage - 1) * dataPerPage, currentPage * dataPerPage - 1)
 
     const totalPages = count ? Math.ceil(count / dataPerPage) : 0;
+    setCounts({total: [count]});
     try {
       console.log(totalPages);
 
@@ -186,7 +188,7 @@ export const DataContextProvider = ({ children }) => {
 
   return (
     <DataContext.Provider
-      value={{ usersData, fetchUsersData, newUserData, addNewData, setSearch }}
+      value={{ usersData, fetchUsersData, newUserData, addNewData, setSearch, counts }}
     >
       {children}
     </DataContext.Provider>

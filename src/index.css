@@ -30,3 +30,27 @@
     scale: 1.4 .6;
   }
 }
+
+.grid-box{
+  height: 8rem;
+  place-content: center;
+}
+
+.grid-box:hover{
+  cursor: pointer;
+}
+
+
+@media  (width < 968px) {
+  .alpe{
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  
+}
+
+@media  (width < 740px) {
+  .alpe{
+    grid-template-columns: 1fr 1fr;
+  }
+  
+}

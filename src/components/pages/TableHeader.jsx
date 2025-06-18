@@ -1,8 +1,11 @@
 import { useMemo} from "react";
 import { useUsersData } from "../../context/AuthContext";
+import { IoArrowBackCircle } from "react-icons/io5";
+import { useNavigate } from "react-router";
 
 const TableHeader = () => {
-  const { usersData, setSearch } = useUsersData();
+  const { usersData, setSearch , fetchUsersData, counts} = useUsersData();
+  const navigate = useNavigate();
   
 
   const tableHeader = useMemo(() => {
@@ -14,10 +17,10 @@ const TableHeader = () => {
       keyOfArr = [];
     }
 
-    // extracting the id element because it is in the last
-    const id = keyOfArr.pop();
-    keyOfArr.unshift(id);
-    // shifting to the index[0]
+    // // extracting the id element because it is in the last
+    // const id = keyOfArr.pop();
+    // keyOfArr.unshift(id);
+    // // shifting to the index[0]
 
     return keyOfArr;
   }, [usersData]);
@@ -37,20 +40,25 @@ const TableHeader = () => {
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-8 flex justify-between">
+          <div>
+
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
             User Data Dashboard
           </h1>
           <p className="text-gray-600">
-            Showing <span className="font-semibold text-cyan-600">{usersData.length}</span> records
+            Showing <span className="font-semibold text-cyan-600">{usersData.length} <span className="text-gray-600">of</span> {counts.total}</span> records
           </p>
+          </div>
+        <button onClick={() => navigate(-1)} className="text-5xl cursor-pointer h-fit rounded-4xl text-cyan-600 hover:text-cyan-700 "><IoArrowBackCircle /></button>
         </div>
+
         
 
         {usersData.length === 0 ? (
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="text-gray-500 text-xl mb-6">No data available</div>
-            <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-md">
+            <button onClick={fetchUsersData} className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-md">
               Load Sample Data
             </button>
           </div>
