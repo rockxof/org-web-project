@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useUsersData } from '../../context/AuthContext';
 
 const UsersAddForm = () => {
+  const { newUserData, addNewData } = useUsersData();
 
   const [newPerson, setNewPerson] = useState({})
-  const { newUserData, addNewData } = useUsersData();
 
   console.log(newPerson)
 

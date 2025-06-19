@@ -1,49 +1,82 @@
-import { useMemo } from "react";
-import { useUsersData } from "../../context/AuthContext";
 import { IoArrowBackCircle } from "react-icons/io5";
+import { useUsersData } from "../../context/AuthContext";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
-
-const TableHeader = () => {
+const FamilyWiseTable = () => {
+  // contextApi
   const {
+    fetchFamilyWise,
     usersData,
-    setSearch,
-    fetchUsersData,
     counts,
     setSearchColumn,
+    setSearch,
     currentPage,
     setCurrentPage,
     totalPages,
   } = useUsersData();
+
   const navigate = useNavigate();
 
-  const tableHeader = useMemo(() => {
-    return usersData.length > 0 ? Object.keys(usersData[0]) : [];
+  const groupedData = useMemo(() => {
+    if (!usersData || usersData.length === 0) return [];
+
+    const houseGroups = {};
+    usersData.forEach((user) => {
+      const house = user.HouseNo || "Unknown";
+      if (!houseGroups[house]) {
+        houseGroups[house] = [];
+      }
+      houseGroups[house].push(user);
+    });
+
+    const sortedHouses = Object.keys(houseGroups).sort();
+
+    let toggle = false;
+    const result = [];
+
+    sortedHouses.forEach((house) => {
+      toggle = !toggle;
+      const groupColor = toggle ? "bg-cyan-100" : "bg-sky-100";
+      const groupMembers = houseGroups[house];
+
+      // Add header row
+      result.push({
+        isGroupHeader: true,
+        houseNo: house,
+        groupCount: groupMembers.length,
+        groupColor,
+      });
+
+      // Add members of that house
+      groupMembers.forEach((member) => {
+        result.push({
+          ...member,
+          isGroupHeader: false,
+          groupColor,
+        });
+      });
+    });
+
+    return result;
   }, [usersData]);
 
-  const pageMeta = useMemo(() => {
-    if (usersData.length === 0) {
-      return {
-        partNo: "N/A",
-        sectionNo: "N/A",
-        panchayat: "N/A",
-        block: "N/A",
-      };
+  const tableHeader = useMemo(() => {
+    let keyOfArr;
+
+    if (usersData.length > 0) {
+      keyOfArr = Object.keys(usersData[0]);
+    } else {
+      keyOfArr = [];
     }
 
-    const firstUser = usersData[0];
+    // swapping the value
+    if (keyOfArr.length > 11) {
+      const [item] = keyOfArr.splice(11, 1); // Remove the 11th item
+      keyOfArr.unshift(item); // Add it to the beginning
+    }
 
-    return {
-      partNo: firstUser.PartNo || "N/A",
-      sectionNo: firstUser.SectionNo || "N/A",
-      panchayat: firstUser.पंचायत || "N/A",
-      block: firstUser.ब्लॉक || "N/A",
-    };
+    return keyOfArr;
   }, [usersData]);
-
-  // calculate showing from and to for pagination display
-  const dataPerPage = 250;
-  const fromRecord = currentPage * dataPerPage + 1;
-  const toRecord = Math.min((currentPage + 1) * dataPerPage, counts.total || 0);
 
   // Function to format header names for display
   const formatHeader = (header) => {
@@ -52,6 +85,11 @@ const TableHeader = () => {
       .replace(/([A-Z])/g, " $1") // Add space before capital letters
       .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
   };
+
+  // Pagination range
+  const dataPerPage = 250;
+  const fromRecord = currentPage * dataPerPage + 1;
+  const toRecord = Math.min((currentPage + 1) * dataPerPage, counts.total || 0);
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50 p-4 md:p-8">
@@ -78,39 +116,11 @@ const TableHeader = () => {
           </button>
         </div>
 
-        {/* 📌 Sticky Metadata Display Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-cyan-50 py-4 shadow-md">
-          <div className="bg-white p-4 rounded-lg shadow text-center">
-            <p className="text-sm text-gray-500">Part No</p>
-            <p className="text-xl font-semibold text-cyan-600">
-              {pageMeta.partNo}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow text-center">
-            <p className="text-sm text-gray-500">Section No</p>
-            <p className="text-xl font-semibold text-cyan-600">
-              {pageMeta.sectionNo}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow text-center">
-            <p className="text-sm text-gray-500">Panchayat</p>
-            <p className="text-xl font-semibold text-cyan-600">
-              {pageMeta.panchayat}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow text-center">
-            <p className="text-sm text-gray-500">Block</p>
-            <p className="text-xl font-semibold text-cyan-600">
-              {pageMeta.block}
-            </p>
-          </div>
-        </div>
-
         {usersData.length === 0 ? (
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="text-gray-500 text-xl mb-6">No data available</div>
             <button
-              onClick={fetchUsersData}
+              onClick={fetchFamilyWise}
               className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-md"
             >
               Load Sample Data
@@ -136,11 +146,12 @@ const TableHeader = () => {
                 </div>
                 <input
                   onChange={(e) => {
-                    setSearchColumn("EName");
+                    setSearchColumn("HouseNo");
                     setSearch(e.target.value);
+                    setCurrentPage(0);
                   }}
                   type="text"
-                  placeholder="Search by Name..."
+                  placeholder="Search by House No..."
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent w-full md:w-64"
                 />
               </div>
@@ -213,25 +224,42 @@ const TableHeader = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {usersData.map((user, index) => (
-                    <tr
-                      key={user?.s_no || index}
-                      className={`transition-all duration-150 ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      } hover:bg-cyan-50`}
-                    >
-                      {tableHeader.map((header) => (
-                        <td
-                          key={header}
-                          className="px-6 py-4 text-gray-700 whitespace-nowrap"
-                        >
-                          {user[header] || (
-                            <span className="text-gray-400 italic">N/A</span>
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                  {groupedData.map((item, index) => {
+                    if (item.isGroupHeader) {
+                      return (
+                        <tr key={`header-${item.houseNo}`}>
+                          <td
+                            colSpan={tableHeader.length}
+                            className={`px-6 py-3 font-bold text-gray-800 ${item.groupColor} text-lg border-t-4 border-cyan-300`}
+                          >
+                            🏠 House No: {item.houseNo} &nbsp;
+                            <span className="text-sm font-medium text-gray-700">
+                              ({item.groupCount}{" "}
+                              {item.groupCount === 1 ? "member" : "members"})
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return (
+                      <tr
+                        key={item?.s_no || index}
+                        className={`transition-all duration-150 hover:bg-cyan-200 ${item.groupColor}`}
+                      >
+                        {tableHeader.map((header) => (
+                          <td
+                            key={header}
+                            className="px-6 py-4 text-gray-800 whitespace-nowrap"
+                          >
+                            {item[header] || (
+                              <span className="text-gray-400 italic">N/A</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -240,9 +268,10 @@ const TableHeader = () => {
             <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div className="text-sm text-gray-700 mb-4 md:mb-0">
-                  Showing <span className="font-semibold">{fromRecord}</span> to{" "}
-                  <span className="font-semibold">{toRecord}</span> of{" "}
-                  <span className="font-semibold">{counts.total}</span> results
+                  Showing <span className="font-semibold">1</span> to{" "}
+                  <span className="font-semibold">{usersData.length}</span> of{" "}
+                  <span className="font-semibold">{usersData.length}</span>{" "}
+                  results
                 </div>
 
                 <div className="flex space-x-2">
@@ -272,4 +301,4 @@ const TableHeader = () => {
   );
 };
 
-export default TableHeader;
+export default FamilyWiseTable;

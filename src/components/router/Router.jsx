@@ -6,6 +6,7 @@ import PrivateRoute from "./PrivateRoute";
 import UserDashboard from "../dashboard/UserDashboard";
 import AboutUs from "../pages/AboutUs";
 import TableHeader from "../pages/TableHeader";
+import FamilyWiseTable from "../pages/FamilyWiseTable";
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -13,7 +14,8 @@ const router = createBrowserRouter([
   { path: "/admin", element: <PrivateRoute> <Admin /> </PrivateRoute> },
   { path: "/userdashboard", element: <PrivateRoute> <UserDashboard /> </PrivateRoute>},
   { path: "/about-us", element: <AboutUs />},
-  { path: "voters-list", element: <TableHeader />}
+  { path: "voters-list", element: <TableHeader />},
+  { path: "family-wise-list", element: <FamilyWiseTable/>}
 ]);
 
 export default router;

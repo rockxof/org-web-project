@@ -78,101 +78,89 @@ export const DataContextProvider = ({ children }) => {
   const [newUserData, setNewUserData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [search, setSearch] = useState("");
-  const [counts, setCounts] = useState({total: "", M: "", F: ""})
+  const [searchColumn, setSearchColumn] = useState("EName");
+  const [counts, setCounts] = useState({ total: 0, M: 0, F: 0 });
 
-  // console.log(Boolean(search))
+  const dataPerPage = 250;
 
+  const rangeFromAndTo = () => {
+    const from = currentPage * dataPerPage;
+    const to = from + dataPerPage - 1;
+    return { from, to };
+  };
 
-    useEffect(() => {
-      if(!search) {
-        fetchUsersData();
+  const { from, to } = rangeFromAndTo();
+
+  const searchByInput = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("96_Baruraj")
+        .select("*")
+        .ilike(searchColumn, `%${search}%`);
+
+      if (error) {
+        console.error("Search error: ", error);
         return;
       }
 
-      const timer = setTimeout(searchByInput, 500);
-
-      return ()=> clearTimeout(timer);
-    }, [search]);
-
-  useEffect(() => {
-    fetchUsersData();
-    fetchTableHeader();
-  }, []);
-
-  // setting range from and to dynamically
-  const rangeFromAndTo = () => {
-    const dataPerPage = 249;
-    let from = currentPage * dataPerPage;
-    let to = from + dataPerPage;
-
-    if (currentPage > 0) {
-      from += 1;
-    }
-
-    return { from, to, dataPerPage };
-  };
-
-  // search by text
-  const searchByInput = async () => {
-    const { data, error } = await supabase
-      .from("96_Baruraj")
-      .select()
-      .textSearch("EName", search);
-
-    try {
-      if (data) setUsersData(data);
-      if (error) {
-        console.error("error-search by input ", error);
-      }
+      setUsersData(data);
     } catch (error) {
-      console.error("error searching data ", error);
+      console.error("Error during search: ", error);
     }
   };
 
   const fetchUsersData = async () => {
-    const { from, to, dataPerPage } = rangeFromAndTo();
-
-    const { data, count, error } = await supabase
-      .from("96_Baruraj")
-      .select("*", { count: "exact" })
-      .order("id", { ascending: true })
-      .range(from, to);
-    // .range((currentPage - 1) * dataPerPage, currentPage * dataPerPage - 1)
-
-    const totalPages = count ? Math.ceil(count / dataPerPage) : 0;
-    setCounts({total: [count]});
     try {
-      console.log(totalPages);
+      const { data, count, error } = await supabase
+        .from("96_Baruraj")
+        .select("*", { count: "exact" })
+        .order("id", { ascending: true })
+        .range(from, to);
 
-      console.log(count);
-      {
-        data
-          ? setUsersData(data)
-          : console.error("error occurred fetching users Data ", error);
+      if (error) {
+        console.error("Error fetching user data:", error);
+        return;
       }
+
+      setUsersData(data);
+      setCounts(prev => ({ ...prev, total: count }));
     } catch (error) {
-      console.log("error fetching data ", error);
+      console.log("Fetch users data error:", error);
     }
   };
 
-  //get add new data table
+  const fetchFamilyWise = async () => {
+    const { from, to } = rangeFromAndTo();
+    const { data, count, error } = await supabase
+      .from("96_Baruraj")
+      .select()
+      .order("HouseNo", { ascending: false })
+      // .range(from, to);
+
+    if (error) {
+      console.log("Error while fetching family-wise data", error);
+      return;
+    }
+
+    setUsersData(data);
+    setCounts(prev => ({ ...prev, total: count }));
+  };
+
   const fetchTableHeader = async () => {
-    const { data, error } = await supabase
+    const { data, count, error } = await supabase
       .from("Add_New_Data")
       .select("*")
       .limit(1);
-    try {
-      {
-        data
-          ? setNewUserData(data)
-          : console.error("error occurred fetching users Data ", error);
-      }
-    } catch (error) {
-      console.error("error fetching getNewData ", error);
+
+    if (error) {
+      console.error("Error fetching table header data:", error);
+      return;
     }
+
+    setNewUserData(data);
+    setCounts(prev => ({ ...prev, total: count }));
   };
 
-  // adding the new data
   const addNewData = async (newPerson, setNewPerson) => {
     const { error } = await supabase
       .from("Add_New_Data")
@@ -180,15 +168,57 @@ export const DataContextProvider = ({ children }) => {
       .single();
 
     if (error) {
-      alert("error while adding person ", error);
+      alert("Error while adding person: " + error.message);
+    } else {
+      alert("Added Successfully");
+      setNewPerson({});
     }
-    alert("Added Successfully");
-    setNewPerson({});
   };
+
+  const totalPages = Math.ceil(counts.total / dataPerPage);
+
+  // Fetch default data or search result
+  useEffect(() => {
+    if (!search) {
+      fetchUsersData();
+    } else {
+      const timer = setTimeout(searchByInput, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [search]);
+
+  // Re-fetch data when page changes (only if no search is active)
+  useEffect(() => {
+    if (!search) {
+      fetchUsersData();
+    }
+  }, [currentPage]);
+
+  // Fetch structure for header
+  useEffect(() => {
+    if (localStorage.getItem("role") === "user") {
+      fetchTableHeader();
+    }
+  }, []);
+
+
+
 
   return (
     <DataContext.Provider
-      value={{ usersData, fetchUsersData, newUserData, addNewData, setSearch, counts }}
+      value={{
+        usersData,
+        fetchUsersData,
+        newUserData,
+        addNewData,
+        setSearch,
+        counts,
+        setSearchColumn,
+        fetchFamilyWise,
+        currentPage,
+        setCurrentPage,
+        totalPages
+      }}
     >
       {children}
     </DataContext.Provider>

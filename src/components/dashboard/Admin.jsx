@@ -22,12 +22,12 @@ const Admin = () => {
     <>
       <SignOut />
       {/* <GenderMenu setGender= {setGender}/> */}
-      <Filters />
+      {/* <Filters /> */}
       {/* {userRole === 'admin' && <UsersTable />} */}
 
       {/* <UsersTable /> */}
 
-      <CategoryList/>
+      <CategoryList />
 
       {/* <UsersData gender={gender}/> */}
 
