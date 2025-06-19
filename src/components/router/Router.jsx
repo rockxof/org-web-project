@@ -7,6 +7,7 @@ import UserDashboard from "../dashboard/UserDashboard";
 import AboutUs from "../pages/AboutUs";
 import TableHeader from "../pages/TableHeader";
 import FamilyWiseTable from "../pages/FamilyWiseTable";
+import AgeWiseTable from "../pages/AgeWiseTable";
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -15,7 +16,8 @@ const router = createBrowserRouter([
   { path: "/userdashboard", element: <PrivateRoute> <UserDashboard /> </PrivateRoute>},
   { path: "/about-us", element: <AboutUs />},
   { path: "voters-list", element: <TableHeader />},
-  { path: "family-wise-list", element: <FamilyWiseTable/>}
+  { path: "family-wise-list", element: <FamilyWiseTable/>},
+  { path: "age-wise-list", element: <AgeWiseTable />}
 ]);
 
 export default router;

@@ -1,13 +1,11 @@
+import { useEffect, useMemo, useState } from "react";
 import { IoArrowBackCircle } from "react-icons/io5";
-import { useUsersData } from "../../context/AuthContext";
-import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
+import { useUsersData } from "../../context/AuthContext";
+
 const FamilyWiseTable = () => {
-  // contextApi
   const {
     fetchFamilyWise,
-    usersData,
-    counts,
     setSearchColumn,
     setSearch,
     currentPage,
@@ -15,7 +13,22 @@ const FamilyWiseTable = () => {
     totalPages,
   } = useUsersData();
 
+  const [usersData, setUsersData] = useState([]);
+  const [counts, setCounts] = useState({ total: 0 });
+
   const navigate = useNavigate();
+
+  const loadFamilyWiseData = async () => {
+    const { data, count } = await fetchFamilyWise();
+    if (data) {
+      setUsersData(data);
+      setCounts({ total: count });
+    }
+  };
+
+  useEffect(() => {
+    loadFamilyWiseData();
+  }, []);
 
   const groupedData = useMemo(() => {
     if (!usersData || usersData.length === 0) return [];
@@ -30,7 +43,6 @@ const FamilyWiseTable = () => {
     });
 
     const sortedHouses = Object.keys(houseGroups).sort();
-
     let toggle = false;
     const result = [];
 
@@ -39,7 +51,6 @@ const FamilyWiseTable = () => {
       const groupColor = toggle ? "bg-cyan-100" : "bg-sky-100";
       const groupMembers = houseGroups[house];
 
-      // Add header row
       result.push({
         isGroupHeader: true,
         houseNo: house,
@@ -47,7 +58,6 @@ const FamilyWiseTable = () => {
         groupColor,
       });
 
-      // Add members of that house
       groupMembers.forEach((member) => {
         result.push({
           ...member,
@@ -62,31 +72,27 @@ const FamilyWiseTable = () => {
 
   const tableHeader = useMemo(() => {
     let keyOfArr;
-
     if (usersData.length > 0) {
       keyOfArr = Object.keys(usersData[0]);
     } else {
       keyOfArr = [];
     }
 
-    // swapping the value
     if (keyOfArr.length > 11) {
-      const [item] = keyOfArr.splice(11, 1); // Remove the 11th item
-      keyOfArr.unshift(item); // Add it to the beginning
+      const [item] = keyOfArr.splice(11, 1);
+      keyOfArr.unshift(item);
     }
 
     return keyOfArr;
   }, [usersData]);
 
-  // Function to format header names for display
   const formatHeader = (header) => {
     return header
-      .replace(/_/g, " ") // Replace underscores with spaces
-      .replace(/([A-Z])/g, " $1") // Add space before capital letters
-      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+      .replace(/_/g, " ")
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase());
   };
 
-  // Pagination range
   const dataPerPage = 250;
   const fromRecord = currentPage * dataPerPage + 1;
   const toRecord = Math.min((currentPage + 1) * dataPerPage, counts.total || 0);
@@ -120,7 +126,7 @@ const FamilyWiseTable = () => {
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="text-gray-500 text-xl mb-6">No data available</div>
             <button
-              onClick={fetchFamilyWise}
+              onClick={loadFamilyWiseData}
               className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-md"
             >
               Load Sample Data

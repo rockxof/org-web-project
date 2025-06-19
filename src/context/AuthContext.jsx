@@ -80,6 +80,9 @@ export const DataContextProvider = ({ children }) => {
   const [search, setSearch] = useState("");
   const [searchColumn, setSearchColumn] = useState("EName");
   const [counts, setCounts] = useState({ total: 0, M: 0, F: 0 });
+  const [viewMode, setViewMode] = useState("default");
+
+  const [ageRange, setAgeRange] = useState({ min: 18, max: 31 });
 
   const dataPerPage = 250;
 
@@ -129,22 +132,44 @@ export const DataContextProvider = ({ children }) => {
     }
   };
 
+// Family Wise Data
   const fetchFamilyWise = async () => {
+  setViewMode("familyWise");
+  const { from, to } = rangeFromAndTo();
+
+  const { data, count, error } = await supabase
+    .from("96_Baruraj")
+    .select("*", { count: "exact" })  // Add count option
+    .order("HouseNo", { ascending: false })
+    // .range(from , to); // Uncomment if needed for pagination
+
+  if (error) {
+    console.log("Error while fetching family-wise data", error);
+    return { data: null, count: 0 };
+  }
+
+  return { data, count }; // ✅ Now returns data and count
+};
+
+
+  // age range wise data
+ const fetchByAgeRange = async (minAge = ageRange.min, maxAge = ageRange.max) => {
+    setViewMode("ageRange");
     const { from, to } = rangeFromAndTo();
     const { data, count, error } = await supabase
       .from("96_Baruraj")
-      .select()
-      .order("HouseNo", { ascending: false })
-      // .range(from, to);
+      .select("id, EName, E_Surname, CASTE, Age, Gender", { count: "exact" })
+      .gte("Age", minAge)
+      .lte("Age", maxAge)
+      .range(from, to);
 
     if (error) {
-      console.log("Error while fetching family-wise data", error);
-      return;
+      console.error("Error fetching users:", error);
+    } else {
+      return { data, count };
     }
-
-    setUsersData(data);
-    setCounts(prev => ({ ...prev, total: count }));
   };
+
 
   const fetchTableHeader = async () => {
     const { data, count, error } = await supabase
@@ -189,10 +214,10 @@ export const DataContextProvider = ({ children }) => {
 
   // Re-fetch data when page changes (only if no search is active)
   useEffect(() => {
-    if (!search) {
+    if (viewMode === "default") {
       fetchUsersData();
     }
-  }, [currentPage]);
+  }, [currentPage, viewMode]);
 
   // Fetch structure for header
   useEffect(() => {
@@ -217,7 +242,10 @@ export const DataContextProvider = ({ children }) => {
         fetchFamilyWise,
         currentPage,
         setCurrentPage,
-        totalPages
+        totalPages,
+        fetchByAgeRange,
+        setViewMode,
+        setAgeRange
       }}
     >
       {children}
