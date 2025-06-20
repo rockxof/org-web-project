@@ -8,6 +8,7 @@ import AboutUs from "../pages/AboutUs";
 import TableHeader from "../pages/TableHeader";
 import FamilyWiseTable from "../pages/FamilyWiseTable";
 import AgeWiseTable from "../pages/AgeWiseTable";
+import CasteWiseTable from "../pages/CasteWiseTable";
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -17,7 +18,8 @@ const router = createBrowserRouter([
   { path: "/about-us", element: <AboutUs />},
   { path: "voters-list", element: <TableHeader />},
   { path: "family-wise-list", element: <FamilyWiseTable/>},
-  { path: "age-wise-list", element: <AgeWiseTable />}
+  { path: "age-wise-list", element: <AgeWiseTable />},
+  { path: "caste-wise-table", element: <CasteWiseTable />}
 ]);
 
 export default router;

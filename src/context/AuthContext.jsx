@@ -182,6 +182,36 @@ export const DataContextProvider = ({ children }) => {
     }
   };
 
+  // CASTE WISE DATA
+ const fetchCasteCounts = async () => {
+  const { data, error } = await supabase.rpc("get_caste_counts");
+  if (error) {
+    console.error("Error fetching caste summary:", error);
+    return [];
+  }
+  return data;
+};
+
+  const fetchUsersByCaste = async (caste, page = 1, pageSize = 100) => {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, count, error } = await supabase
+    .from("96_Baruraj")
+    .select("*", { count: "exact" })
+    .eq("CASTE", caste)
+    .range(from, to);
+
+  if (error) {
+    console.error(error);
+    return { data: [], count: 0 };
+  }
+
+  return { data, count };
+};
+
+
+
   const fetchTableHeader = async () => {
     const { data, count, error } = await supabase
       .from("Add_New_Data")
@@ -254,6 +284,8 @@ export const DataContextProvider = ({ children }) => {
         fetchByAgeRange,
         setViewMode,
         setAgeRange,
+        fetchCasteCounts,
+        fetchUsersByCaste
       }}
     >
       {children}
