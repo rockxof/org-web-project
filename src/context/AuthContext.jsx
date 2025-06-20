@@ -126,36 +126,39 @@ export const DataContextProvider = ({ children }) => {
       }
 
       setUsersData(data);
-      setCounts(prev => ({ ...prev, total: count }));
+      setCounts((prev) => ({ ...prev, total: count }));
     } catch (error) {
       console.log("Fetch users data error:", error);
     }
   };
 
-// Family Wise Data
+  // Family Wise Data
   const fetchFamilyWise = async () => {
-  setViewMode("familyWise");
-  const { from, to } = rangeFromAndTo();
+    setViewMode("familyWise");
+    const { from, to } = rangeFromAndTo();
 
-  const { data, count, error } = await supabase
-    .from("96_Baruraj")
-    .select("*", { count: "exact" })  // Add count option
-    .order("HouseNo", { ascending: false })
+    const { data, count, error } = await supabase
+      .from("96_Baruraj")
+      .select("*", { count: "exact" }) // Add count option
+      .order("HouseNo", { ascending: false });
     // .range(from , to); // Uncomment if needed for pagination
 
-  if (error) {
-    console.log("Error while fetching family-wise data", error);
-    return { data: null, count: 0 };
-  }
+    if (error) {
+      console.log("Error while fetching family-wise data", error);
+      return { data: null, count: 0 };
+    }
 
-  return { data, count }; // ✅ Now returns data and count
-};
-
+    return { data, count }; // ✅ Now returns data and count
+  };
 
   // age range wise data
- const fetchByAgeRange = async (minAge = ageRange.min, maxAge = ageRange.max) => {
+  const fetchByAgeRange = async (
+    minAge,
+    maxAge,
+    from,
+    to 
+  ) => {
     setViewMode("ageRange");
-    const { from, to } = rangeFromAndTo();
     const { data, count, error } = await supabase
       .from("96_Baruraj")
       .select("id, EName, E_Surname, CASTE, Age, Gender", { count: "exact" })
@@ -163,13 +166,21 @@ export const DataContextProvider = ({ children }) => {
       .lte("Age", maxAge)
       .range(from, to);
 
+    // 2. Fetch male/female counts grouped
+    const { data: genderCounts } = await supabase.rpc(
+      "get_gender_counts_by_age_range",
+      {
+        min_age: minAge,
+        max_age: maxAge,
+      }
+    );
+
     if (error) {
       console.error("Error fetching users:", error);
     } else {
-      return { data, count };
+      return { data, count, genderCounts };
     }
   };
-
 
   const fetchTableHeader = async () => {
     const { data, count, error } = await supabase
@@ -183,7 +194,7 @@ export const DataContextProvider = ({ children }) => {
     }
 
     setNewUserData(data);
-    setCounts(prev => ({ ...prev, total: count }));
+    setCounts((prev) => ({ ...prev, total: count }));
   };
 
   const addNewData = async (newPerson, setNewPerson) => {
@@ -226,9 +237,6 @@ export const DataContextProvider = ({ children }) => {
     }
   }, []);
 
-
-
-
   return (
     <DataContext.Provider
       value={{
@@ -245,7 +253,7 @@ export const DataContextProvider = ({ children }) => {
         totalPages,
         fetchByAgeRange,
         setViewMode,
-        setAgeRange
+        setAgeRange,
       }}
     >
       {children}

@@ -8,18 +8,56 @@ const AgeWiseTable = () => {
   const [count, setCount] = useState(0);
   const [minAge, setMinAge] = useState(18);
   const [maxAge, setMaxAge] = useState(31);
+  const [maleCount, setMaleCount] = useState(0);
+  const [femaleCount, setFemaleCount] = useState(0);
+  const [debouncedMinAge, setDebouncedMinAge] = useState(minAge);
+  const [debouncedMaxAge, setDebouncedMaxAge] = useState(maxAge);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(250);
 
   const { fetchByAgeRange } = useUsersData();
   const navigate = useNavigate();
 
+  // debouncing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMinAge(minAge);
+      setDebouncedMaxAge(maxAge);
+    }, 900); //
+
+    return () => clearTimeout(handler); // cleanup timeout
+  }, [minAge, maxAge]);
+
   useEffect(() => {
     const fetchData = async () => {
-      const { data, count } = await fetchByAgeRange(minAge, maxAge);
-      if (data) setAgeTable(data);
-      count && setCount(count);
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, count, genderCounts } = await fetchByAgeRange(
+        minAge,
+        maxAge,
+        from,
+        to
+      );
+      if (data) {
+        setAgeTable(data);
+        setCount(count);
+
+        const males =
+          genderCounts.find((g) => g.gender?.toLowerCase() === "m")?.total || 0;
+        const females =
+          genderCounts.find((g) => g.gender?.toLowerCase() === "f")?.total || 0;
+
+        setMaleCount(males);
+        setFemaleCount(females);
+      }
     };
     fetchData();
-  }, [minAge, maxAge]);
+  }, [debouncedMinAge, debouncedMaxAge, currentPage, pageSize]);
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [debouncedMinAge, debouncedMaxAge]);
 
   const tableHeader = useMemo(() => {
     return ageTable.length > 0 ? Object.keys(ageTable[0]) : [];
@@ -39,7 +77,17 @@ const AgeWiseTable = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
             Age-wise Data Table
           </h1>
-          <span className="text-lg font-medium text-gray-600">{count}</span>
+          <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-gray-700">
+            <span>
+              Total: <strong>{count}</strong>
+            </span>
+            <span>
+              Males: <strong className="text-blue-600">{maleCount}</strong>
+            </span>
+            <span>
+              Females: <strong className="text-pink-600">{femaleCount}</strong>
+            </span>
+          </div>
           <button
             onClick={() => navigate(-1)}
             className="text-5xl cursor-pointer h-fit rounded-4xl text-cyan-600 hover:text-cyan-700"
@@ -50,7 +98,9 @@ const AgeWiseTable = () => {
 
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
           <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-600">Min Age</label>
+            <label className="text-sm font-semibold text-gray-600">
+              Min Age
+            </label>
             <input
               type="number"
               value={minAge}
@@ -60,7 +110,9 @@ const AgeWiseTable = () => {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-600">Max Age</label>
+            <label className="text-sm font-semibold text-gray-600">
+              Max Age
+            </label>
             <input
               type="number"
               value={maxAge}
@@ -127,6 +179,33 @@ const AgeWiseTable = () => {
                   ))}
                 </tbody>
               </table>
+
+                  <div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+    disabled={currentPage === 1}
+    className="px-4 py-2 bg-cyan-600 text-white rounded disabled:opacity-50"
+  >
+    Previous
+  </button>
+  <span className="text-gray-700">
+    Page <strong>{currentPage}</strong> of{" "}
+    <strong>{Math.ceil(count / pageSize)}</strong>
+  </span>
+  <button
+    onClick={() =>
+      setCurrentPage((prev) =>
+        prev < Math.ceil(count / pageSize) ? prev + 1 : prev
+      )
+    }
+    disabled={currentPage >= Math.ceil(count / pageSize)}
+    className="px-4 py-2 bg-cyan-600 text-white rounded disabled:opacity-50"
+  >
+    Next
+  </button>
+</div>
+
+
             </div>
           </div>
         )}
